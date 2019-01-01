@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<p id="demo"></p>
+
+<button onclick="startGame()">Start</button>
+<button onclick="init()">Reset</button>
+<button onclick="location.href='https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life'" type="button">Wiki</button>
+<button onclick="location.href='./help.html'" type="button">Help</button>
+<button onclick="sampleInit()">Run Example</button>
+
+<p></p>
+
+<canvas id="myCanvas" width="1800" height="750" style="border:1px solid #d3d3d3;">
+
+<script>
+
+	////////////////////////// Support Code Copied From Web ///////////////////////////////////////
+
+	// Create N-Diminsional array (e.g. createArray(5,10))
+	// see https://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript
+	// Example: var twoDArray = createNDimensionArray(firstDim, secondDim);
+	function createNDimensionArray(length) {
+		var arr = new Array(length || 0),
+			i = length;
+
+		if (arguments.length > 1) {
+			var args = Array.prototype.slice.call(arguments, 1);
+			while(i--) arr[length-1 - i] = createNDimensionArray.apply(this, args);
+		}
+
+		return arr;
+	}
+
+	// reference: 	https://www.w3schools.com/tags/canvas_rect.asp
+	//				https://www.w3schools.com/tags/canvas_beginpath.asp
+	function drawBoxOnCanvus (ctx, pixelX, pixelY, width, height, fillFlag) {
+		ctx.fillStyle = "white";
+		ctx.fillRect(pixelX, pixelY, width, height);
+
+		ctx.beginPath();
+		ctx.rect(pixelX, pixelY, width, height);
+		ctx.stroke();
+		if (fillFlag) {
+			ctx.fillStyle = "red";
+			ctx.fillRect(pixelX, pixelY, width, height);
+		}
+	}
+
+	// getMousePos and setCurrentCoordinates copied from https://stackoverflow.com/questions/17130395/real-mouse-position-in-canvas
+	// returns in { x, y }
+	function getMousePos(canvas, evt) {
+		var rect = canvas.getBoundingClientRect();
+		return {
+			x: evt.clientX - rect.left,
+			y: evt.clientY - rect.top
+		};
+	}
+
+	// sample timer function: https://www.w3schools.com/jsref/met_win_setinterval.asp
+	var frequencyInMillisecond = 500;
+	timerId = setInterval(timerFunction, frequencyInMillisecond);
+	function timerFunction() {
+		console.log("timerFunction");
+	}
+
+	function setCurrentCoordinates(evt) {
+		var mousePos = getMousePos(canvas, evt);
+		scaledX = Math.floor(mousePos.x / boxWidthInPixels);
+		scaledY = Math.floor((mousePos.y / boxHeightInPixels));
+	}
+
+	function clearCanvas() {
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	}
+
+	function catchMouseDown() {
+		console.log("catch mouse down");
+	}
+
+	var canvas;
+	var ctx;
+	var canvasWidth;
+	var canvasHeight;
+
+	function initCanvas() {
+		canvas = document.getElementById("myCanvas");
+		canvasWidth = canvas.width;
+		canvasHeight = canvas.height;
+		ctx = canvas.getContext("2d");
+
+		canvas.addEventListener('mousedown', catchMouseDown, false );
+		canvas.addEventListener('mousemove', setCurrentCoordinates, false);
+	}
+//////////////////////////////////////
+
+initCanvas();
+
+var boxWidthInPixels = 30;
+var boxHeightInPixels = 30;
+
+var boardWidthInBoxes = canvasWidth / boxWidthInPixels;
+var boardHeightInBoxes = canvasHeight / boxHeightInPixels;
+
+var board1 = createNDimensionArray(boardWidthInBoxes, boardHeightInBoxes);
+var board2 = createNDimensionArray(boardWidthInBoxes, boardHeightInBoxes);
+
+var startBoard;
+var finishBoard;
+
+var scaledX;
+var scaledY;
+
+var speed = 500;
+
+var tempBoard;
+
+function drawBox(x, y, fillFlag){
+    var pixelX = boxWidthInPixels * x
+    var pixelY = boxHeightInPixels * y
+        ctx.fillStyle = "white";
+        ctx.fillRect(pixelX, pixelY, boxWidthInPixels, boxHeightInPixels);
+        ctx.beginPath();
+        ctx.rect(pixelX, pixelY, boxWidthInPixels, boxHeightInPixels);
+        ctx.stroke();
+        if (fillFlag) {
+            ctx.fillStyle = "red";
+            ctx.fillRect(pixelX, pixelY, boxWidthInPixels, boxHeightInPixels);
+        }
+    }
+
+function displayGeneration(board) {
+    for (x = 0; x < boardWidthInBoxes; x++) {
+        for (y = 0; y < boardHeightInBoxes; y++) {
+            //console.log("displayGeneration x,y", x, y);
+            drawBox(x, y, board[x][y]);
+        }
+    }
+}
+
+function clearBoard (board) {
+    for (x=0; x < boardWidthInBoxes; x++) {
+        for (y=0; y < boardHeightInBoxes; y++) {
+            board[x][y] = false;
+        }
+    }
+}
+
+function catchMouseDown() {
+    console.log("catch mouse down");
+    drawBox(scaledX, scaledY, !board1[scaledX][scaledY]);
+    board1[scaledX][scaledY] = !board1[scaledX][scaledY];
+}
+
+init();
+
+function sampleInit() {
+    clearBoard(board1);
+    board1[15][5] = true;
+    board1[15][6] = true;
+    board1[15][7] = true;
+    board1[15][8] = true;
+    board1[15][9] = true;
+    board1[17][5] = true;
+    board1[17][6] = true;
+    board1[17][7] = true;
+    board1[17][8] = true;
+    board1[17][9] = true;
+    board1[16][4] = true;
+    board1[16][10] = true;
+    displayGeneration(board1);
+    if (timerId) {
+        clearTimeout(timerId);
+    }
+    startGame();
+}
+
+function init() {
+    clearBoard(board1);
+    displayGeneration(board1);
+    if (timerId) {
+        clearTimeout(timerId);
+    }
+}
+
+function startGame() {
+    if (timerId) {
+        clearTimeout(timerId);
+    }
+
+    startBoard = board1;
+    finishBoard = board2;
+
+    timerId = setInterval(oneTurn, speed);
+}
+
+function oneTurn() {
+    console.log("one turn");
+    oneGenerationPerRules(startBoard, finishBoard);
+    displayGeneration(finishBoard);
+    tempBoard = finishBoard;
+    finishBoard = startBoard;
+    startBoard = tempBoard;
+}
+
+function oneGenerationPerRules(startBoard, finishBoard) {
+    console.log("oneGenerationPerRules");
+    for (x=0; x < boardWidthInBoxes; x++) {
+        for (y=0; y < boardHeightInBoxes; y++) {
+            finishBoard[x][y] = rules(startBoard, x, y);
+        }
+    }
+}
+
+
+function countNeighbours(board, x, y) {
+    var count = 0;
+
+    var n1 = false;
+    var n2 = false;
+    var n3 = false;
+    var n4 = false;
+    var n5 = false;
+    var n6 = false;
+    var n7 = false;
+    var n8 = false;
+
+    if (ifPartOfBoard(x, y-1)) {
+        n1 = board[x][y-1];
+    } else {
+        n1 = board [x][boardHeightInBoxes-1];
+    }
+
+    if (ifPartOfBoard(x+1, y-1)) {
+        n2 = board[x+1][y-1];
+    } else if (x+1 == boardWidthInBoxes && y-1 < 0) {
+        n2 = board[0][boardHeightInBoxes-1];
+    } else if (x+1 == boardWidthInBoxes) {
+        n2 = board[0][y-1];
+    } else {
+        n2 = board[x+1][boardHeightInBoxes-1];
+    }
+
+
+    if (ifPartOfBoard(x+1, y)) {
+        n3 = board[x+1][y];
+    } else {
+        n3 = board[0][y];
+    }
+
+    if (ifPartOfBoard(x+1, y+1)) {
+        n4 = board[x+1][y+1];
+    } else if (x+1 == boardWidthInBoxes && y+1 == boardHeightInBoxes) {
+        n4 = board[0][0];
+    } else if (x+1 == boardWidthInBoxes) {
+        n4 = board[0][y+1];
+    } else {
+        n4 = board[x+1][0];
+    }
+
+    if (ifPartOfBoard(x, y+1)) {
+        n5 = board[x][y+1];
+    } else {
+        n5 = board[x][0];
+    }
+
+    if (ifPartOfBoard(x-1, y+1)) {
+        n6 = board[x-1][y+1];
+    } else if (x-1 < 0 && y+1 == boardHeightInBoxes) {
+        n6 = board[boardWidthInBoxes-1][0];
+    } else if (x-1 < 0) {
+        n6 = board[boardWidthInBoxes-1][y+1];
+    } else {
+        n6 = board[x-1][0];
+    }
+
+    if (ifPartOfBoard(x-1, y)) {
+        n7 = board[x-1][y];
+    } else {
+        n7 = board[boardWidthInBoxes-1][y];
+    }
+
+    if (ifPartOfBoard(x-1, y-1)) {
+        n8 = board[x-1][y-1];
+    } else if (x-1 < 0 && y-1 < 0) {
+        n8 = board[boardWidthInBoxes-1][boardHeightInBoxes-1];
+    } else if (x-1 < 0) {
+        n8 = board[boardWidthInBoxes-1][y-1];
+    } else {
+        n8 = board[x-1][boardHeightInBoxes-1];
+    }
+
+
+    if (n1) {
+        count++
+    }
+    if (n2) {
+        count++
+    }
+    if (n3) {
+        count++
+    }
+    if (n4) {
+        count++
+    }
+    if (n5) {
+        count++
+    }
+    if (n6) {
+        count++
+    }
+    if (n7) {
+        count++
+    }
+    if (n8) {
+        count++
+    }
+    return count;
+}
+
+
+function rules(board, x, y) {
+    //console.log("rules");
+    var answer;
+    var neighbourCount = countNeighbours(board, x, y);
+    //console.log("neighbourCount", x, y, boardWidthInBoxes, boardHeightInBoxes, neighbourCount);
+    if (board[x][y] && (neighbourCount < 2)) {
+        answer = false;
+    } else if (board[x][y] && (neighbourCount == 2 || neighbourCount == 3 )) {
+        answer = true;
+    } else if (board[x][y] && (neighbourCount > 3)) {
+        answer = false;
+    } else if (!board[x][y] && (neighbourCount == 3)) {
+        answer = true;
+    }
+    return answer;
+}
+
+function ifPartOfBoard(x,y) {
+    var result;
+    result = (x < boardWidthInBoxes && y < boardHeightInBoxes && x >= 0 && y >= 0);
+    return result;
+}
+
+
+
+</script>
+</body>
+</html>
