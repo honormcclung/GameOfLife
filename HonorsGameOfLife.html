@@ -97,6 +97,14 @@
 
 initCanvas();
 
+var color1 = "blue";
+var color2 = "red";
+
+var defaultBoardValue = {
+    color: color1,
+    alive: false,
+}
+
 var boxWidthInPixels = 30;
 var boxHeightInPixels = 30;
 
@@ -116,7 +124,7 @@ var speed = 500;
 
 var tempBoard;
 
-function drawBox(x, y, fillFlag){
+function drawBox(x, y, fillFlag, color){
     var pixelX = boxWidthInPixels * x
     var pixelY = boxHeightInPixels * y
         ctx.fillStyle = "white";
@@ -125,7 +133,7 @@ function drawBox(x, y, fillFlag){
         ctx.rect(pixelX, pixelY, boxWidthInPixels, boxHeightInPixels);
         ctx.stroke();
         if (fillFlag) {
-            ctx.fillStyle = "red";
+            ctx.fillStyle = color;
             ctx.fillRect(pixelX, pixelY, boxWidthInPixels, boxHeightInPixels);
         }
     }
@@ -134,7 +142,7 @@ function displayGeneration(board) {
     for (x = 0; x < boardWidthInBoxes; x++) {
         for (y = 0; y < boardHeightInBoxes; y++) {
             //console.log("displayGeneration x,y", x, y);
-            drawBox(x, y, board[x][y]);
+            drawBox(x, y, board[x][y].alive, board[x][y].color);
         }
     }
 }
@@ -142,33 +150,33 @@ function displayGeneration(board) {
 function clearBoard (board) {
     for (x=0; x < boardWidthInBoxes; x++) {
         for (y=0; y < boardHeightInBoxes; y++) {
-            board[x][y] = false;
+            board[x][y] = defaultBoardValue;
         }
     }
 }
 
 function catchMouseDown() {
     console.log("catch mouse down");
-    drawBox(scaledX, scaledY, !board1[scaledX][scaledY]);
-    board1[scaledX][scaledY] = !board1[scaledX][scaledY];
+    drawBox(scaledX, scaledY, !board1[scaledX][scaledY].alive, board1[scaledX][scaledY].color);
+    board1[scaledX][scaledY] = !board1[scaledX][scaledY].alive;
 }
 
 init();
 
 function sampleInit() {
     clearBoard(board1);
-    board1[15][5] = true;
-    board1[15][6] = true;
-    board1[15][7] = true;
-    board1[15][8] = true;
-    board1[15][9] = true;
-    board1[17][5] = true;
-    board1[17][6] = true;
-    board1[17][7] = true;
-    board1[17][8] = true;
-    board1[17][9] = true;
-    board1[16][4] = true;
-    board1[16][10] = true;
+    board1[15][5].alive = true;
+    board1[15][6].alive = true;
+    board1[15][7].alive = true;
+    board1[15][8].alive = true;
+    board1[15][9].alive = true;
+    board1[17][5].alive = true;
+    board1[17][6].alive = true;
+    board1[17][7].alive = true;
+    board1[17][8].alive = true;
+    board1[17][9].alive = true;
+    board1[16][4].alive = true;
+    board1[16][10].alive = true;
     displayGeneration(board1);
     if (timerId) {
         clearTimeout(timerId);
@@ -178,6 +186,7 @@ function sampleInit() {
 
 function init() {
     clearBoard(board1);
+    clearBoard(board2);
     displayGeneration(board1);
     if (timerId) {
         clearTimeout(timerId);
@@ -208,7 +217,7 @@ function oneGenerationPerRules(startBoard, finishBoard) {
     console.log("oneGenerationPerRules");
     for (x=0; x < boardWidthInBoxes; x++) {
         for (y=0; y < boardHeightInBoxes; y++) {
-            finishBoard[x][y] = rules(startBoard, x, y);
+            finishBoard[x][y].alive = rules(startBoard, x, y);
         }
     }
 }
@@ -227,68 +236,68 @@ function countNeighbours(board, x, y) {
     var n8 = false;
 
     if (ifPartOfBoard(x, y-1)) {
-        n1 = board[x][y-1];
+        n1 = board[x][y-1].alive;
     } else {
-        n1 = board [x][boardHeightInBoxes-1];
+        n1 = board [x][boardHeightInBoxes-1].alive;
     }
 
     if (ifPartOfBoard(x+1, y-1)) {
-        n2 = board[x+1][y-1];
+        n2 = board[x+1][y-1].alive;
     } else if (x+1 == boardWidthInBoxes && y-1 < 0) {
-        n2 = board[0][boardHeightInBoxes-1];
+        n2 = board[0][boardHeightInBoxes-1].alive;
     } else if (x+1 == boardWidthInBoxes) {
-        n2 = board[0][y-1];
+        n2 = board[0][y-1].alive;
     } else {
-        n2 = board[x+1][boardHeightInBoxes-1];
+        n2 = board[x+1][boardHeightInBoxes-1].alive;
     }
 
 
     if (ifPartOfBoard(x+1, y)) {
-        n3 = board[x+1][y];
+        n3 = board[x+1][y].alive;
     } else {
-        n3 = board[0][y];
+        n3 = board[0][y].alive;
     }
 
     if (ifPartOfBoard(x+1, y+1)) {
-        n4 = board[x+1][y+1];
+        n4 = board[x+1][y+1].alive;
     } else if (x+1 == boardWidthInBoxes && y+1 == boardHeightInBoxes) {
-        n4 = board[0][0];
+        n4 = board[0][0].alive;
     } else if (x+1 == boardWidthInBoxes) {
-        n4 = board[0][y+1];
+        n4 = board[0][y+1].alive;
     } else {
-        n4 = board[x+1][0];
+        n4 = board[x+1][0].alive;
     }
 
     if (ifPartOfBoard(x, y+1)) {
-        n5 = board[x][y+1];
+        n5 = board[x][y+1].alive;
     } else {
-        n5 = board[x][0];
+        n5 = board[x][0].alive;
     }
 
     if (ifPartOfBoard(x-1, y+1)) {
-        n6 = board[x-1][y+1];
+        n6 = board[x-1][y+1].alive;
     } else if (x-1 < 0 && y+1 == boardHeightInBoxes) {
-        n6 = board[boardWidthInBoxes-1][0];
+        n6 = board[boardWidthInBoxes-1][0].alive;
     } else if (x-1 < 0) {
-        n6 = board[boardWidthInBoxes-1][y+1];
+        n6 = board[boardWidthInBoxes-1][y+1].alive;
     } else {
-        n6 = board[x-1][0];
+        n6 = board[x-1][0].alive;
     }
 
     if (ifPartOfBoard(x-1, y)) {
-        n7 = board[x-1][y];
+        n7 = board[x-1][y].alive;
     } else {
-        n7 = board[boardWidthInBoxes-1][y];
+        n7 = board[boardWidthInBoxes-1][y].alive;
     }
 
     if (ifPartOfBoard(x-1, y-1)) {
-        n8 = board[x-1][y-1];
+        n8 = board[x-1][y-1].alive;
     } else if (x-1 < 0 && y-1 < 0) {
-        n8 = board[boardWidthInBoxes-1][boardHeightInBoxes-1];
+        n8 = board[boardWidthInBoxes-1][boardHeightInBoxes-1].alive;
     } else if (x-1 < 0) {
-        n8 = board[boardWidthInBoxes-1][y-1];
+        n8 = board[boardWidthInBoxes-1][y-1].alive;
     } else {
-        n8 = board[x-1][boardHeightInBoxes-1];
+        n8 = board[x-1][boardHeightInBoxes-1].alive;
     }
 
 
@@ -325,13 +334,13 @@ function rules(board, x, y) {
     var answer;
     var neighbourCount = countNeighbours(board, x, y);
     //console.log("neighbourCount", x, y, boardWidthInBoxes, boardHeightInBoxes, neighbourCount);
-    if (board[x][y] && (neighbourCount < 2)) {
+    if (board[x][y].alive && (neighbourCount < 2)) {
         answer = false;
-    } else if (board[x][y] && (neighbourCount == 2 || neighbourCount == 3 )) {
+    } else if (board[x][y].alive && (neighbourCount == 2 || neighbourCount == 3 )) {
         answer = true;
-    } else if (board[x][y] && (neighbourCount > 3)) {
+    } else if (board[x][y].alive && (neighbourCount > 3)) {
         answer = false;
-    } else if (!board[x][y] && (neighbourCount == 3)) {
+    } else if (!board[x][y].alive && (neighbourCount == 3)) {
         answer = true;
     }
     return answer;
@@ -342,8 +351,6 @@ function ifPartOfBoard(x,y) {
     result = (x < boardWidthInBoxes && y < boardHeightInBoxes && x >= 0 && y >= 0);
     return result;
 }
-
-
 
 </script>
 </body>
