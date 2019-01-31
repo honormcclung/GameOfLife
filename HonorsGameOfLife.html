@@ -18,19 +18,12 @@
 
 	////////////////////////// Support Code Copied From Web ///////////////////////////////////////
 
-	// Create N-Diminsional array (e.g. createArray(5,10))
-	// see https://stackoverflow.com/questions/966225/how-can-i-create-a-two-dimensional-array-in-javascript
-	// Example: var twoDArray = createNDimensionArray(firstDim, secondDim);
-	function createNDimensionArray(length) {
-		var arr = new Array(length || 0),
-			i = length;
-
-		if (arguments.length > 1) {
-			var args = Array.prototype.slice.call(arguments, 1);
-			while(i--) arr[length-1 - i] = createNDimensionArray.apply(this, args);
+	function create2DimensionArray(x,y) {
+		var newArray = new Array(x);
+		for (let i = 0; i < newArray.length; i++) {
+			newArray[i] = new Array(y);
 		}
-
-		return arr;
+		return newArray;
 	}
 
 	// reference: 	https://www.w3schools.com/tags/canvas_rect.asp
@@ -111,8 +104,8 @@ var boxHeightInPixels = 30;
 var boardWidthInBoxes = canvasWidth / boxWidthInPixels;
 var boardHeightInBoxes = canvasHeight / boxHeightInPixels;
 
-var board1 = createNDimensionArray(boardWidthInBoxes, boardHeightInBoxes);
-var board2 = createNDimensionArray(boardWidthInBoxes, boardHeightInBoxes);
+var board1 = create2DimensionArray(boardWidthInBoxes, boardHeightInBoxes);
+var board2 = create2DimensionArray(boardWidthInBoxes, boardHeightInBoxes);
 
 var startBoard;
 var finishBoard;
@@ -150,7 +143,8 @@ function displayGeneration(board) {
 function clearBoard (board) {
     for (x=0; x < boardWidthInBoxes; x++) {
         for (y=0; y < boardHeightInBoxes; y++) {
-            board[x][y] = defaultBoardValue;
+            board[x][y].alive = defaultBoardValue.alive;
+            board[x][y].color = defaultBoardValue.color;
         }
     }
 }
@@ -158,7 +152,8 @@ function clearBoard (board) {
 function catchMouseDown() {
     console.log("catch mouse down");
     drawBox(scaledX, scaledY, !board1[scaledX][scaledY].alive, board1[scaledX][scaledY].color);
-    board1[scaledX][scaledY] = !board1[scaledX][scaledY].alive;
+    let newValue = !board1[scaledX][scaledY].alive;
+    board1[scaledX][scaledY].alive = newValue;
 }
 
 init();
