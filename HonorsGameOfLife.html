@@ -6,6 +6,8 @@
 
 <button onclick="startGame()">Start</button>
 <button onclick="init()">Reset</button>
+<button onclick="setDefaultToColor1()">Red111</button>
+<button onclick="setDefaultToColor2()">Blue2222</button>
 <button onclick="location.href='https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life'" type="button">Wiki</button>
 <button onclick="location.href='./help.html'" type="button">Help</button>
 <button onclick="sampleInit()">Run Example</button>
@@ -90,12 +92,27 @@
 
 initCanvas();
 
+function setDefaultToColor1() {
+	defaultColor = color1;
+}
+
+function setDefaultToColor2() {
+	defaultColor = color2;
+}
+
+
 var color1 = "blue";
 var color2 = "red";
 
-var defaultBoardValue = {
-    color: color1,
-    alive: false,
+var defaultColor = color1;
+
+var counter = 0;
+
+class DefaultBoardValue {
+	constructor() {
+		this.color = color1;
+   		this.alive = false;
+	}
 }
 
 var boxWidthInPixels = 30;
@@ -143,8 +160,7 @@ function displayGeneration(board) {
 function clearBoard (board) {
     for (x=0; x < boardWidthInBoxes; x++) {
         for (y=0; y < boardHeightInBoxes; y++) {
-            board[x][y].alive = defaultBoardValue.alive;
-            board[x][y].color = defaultBoardValue.color;
+            board[x][y] = new DefaultBoardValue();
         }
     }
 }
@@ -154,6 +170,8 @@ function catchMouseDown() {
     drawBox(scaledX, scaledY, !board1[scaledX][scaledY].alive, board1[scaledX][scaledY].color);
     let newValue = !board1[scaledX][scaledY].alive;
     board1[scaledX][scaledY].alive = newValue;
+	board1[scaledX][scaledY].color = defaultColor;
+
 }
 
 init();
