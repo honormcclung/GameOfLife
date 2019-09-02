@@ -101,8 +101,8 @@ function setDefaultToColor2() {
 }
 
 
-var color1 = "blue";
-var color2 = "red";
+var color1 = "red";
+var color2 = "blue";
 
 var defaultColor = color1;
 
@@ -167,11 +167,10 @@ function clearBoard (board) {
 
 function catchMouseDown() {
     console.log("catch mouse down");
-    drawBox(scaledX, scaledY, !board1[scaledX][scaledY].alive, board1[scaledX][scaledY].color);
     let newValue = !board1[scaledX][scaledY].alive;
     board1[scaledX][scaledY].alive = newValue;
 	board1[scaledX][scaledY].color = defaultColor;
-
+    drawBox(scaledX, scaledY, board1[scaledX][scaledY].alive, board1[scaledX][scaledY].color);
 }
 
 init();
